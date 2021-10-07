@@ -17,6 +17,10 @@ public:
 
 private slots:
     void numOpNonSpecialClicked();
+    void op_clearClicked();
+    void op_delClicked();
+    void op_mathOpClicked();
+    void op_signClicked();
 
 private:
     Ui::Calculator *ui;
