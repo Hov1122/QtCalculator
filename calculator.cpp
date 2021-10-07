@@ -29,6 +29,7 @@ Calculator::Calculator(QWidget *parent)
 
     connect(ui->op_clear, SIGNAL(clicked()), this, SLOT(op_clearClicked()));
     connect(ui->op_del, SIGNAL(clicked()), this, SLOT(op_delClicked()));
+    connect(ui->op_equal, SIGNAL(clicked()), this, SLOT(op_equalClicked()));
 }
 
 Calculator::~Calculator()
@@ -77,3 +78,13 @@ void Calculator::op_signClicked()
 
 }
 
+void Calculator::op_equalClicked()
+{
+    double res = countExpression(ui->input->text());
+    ui->answerLabel->setText(QString::number(res));
+}
+
+double Calculator::countExpression(const QString& exp)
+{
+
+}

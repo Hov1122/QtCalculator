@@ -21,8 +21,11 @@ private slots:
     void op_delClicked();
     void op_mathOpClicked();
     void op_signClicked();
+    void op_equalClicked();
 
 private:
     Ui::Calculator *ui;
+
+    double countExpression(const QString&);
 };
 #endif // CALCULATOR_H
