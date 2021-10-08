@@ -1,6 +1,6 @@
 #include "calculator.h"
 #include "ui_calculator.h"
-#include <iostream>
+//#include <iostream>
 #include <QKeyEvent>
 #include <map>
 #include <QRegularExpression>
@@ -129,6 +129,10 @@ void Calculator::op_mathOpClicked()
 
 void Calculator::op_equalClicked()
 {
+    if (ui->input->text().isEmpty()){
+        ui->input->setFocus();
+        return;
+    }
     QChar no = ui->input->text()[ui->input->text().size() - 1];
     QString res;
     if (no == '/' || no == '*' || no == '+' || no == '-' || no == '%') {
@@ -141,6 +145,7 @@ void Calculator::op_equalClicked()
         else ui->answerLabel->setStyleSheet("QLabel { color : black; }");
     }
     ui->answerLabel->setText(res);
+    ui->input->setFocus();
 }
 
 void Calculator::setFocus()
@@ -338,8 +343,6 @@ bool Calculator::eventFilter(QObject *obj, QEvent *event)
         if (event->type() == QEvent::KeyPress)
         {
             QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);
-
-            QString modifier;
             QString key;
 
             key = QKeySequence(keyEvent->key()).toString();

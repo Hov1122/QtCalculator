@@ -478,25 +478,14 @@ QPushButton:pressed {
     border-color: beige;
     font: bold 14px;
     padding: 6px;
-background: qradialgradient(
-        cx: 0.3, cy: -0.4, fx: 0.3, fy: -0.4,
-        radius: 1.35, stop: 0 #fff, stop: 1 #888
-        );
+
     }
 
-QPushButton:hover {
-    background: qradialgradient(
-        cx: 0.3, cy: -0.4, fx: 0.3, fy: -0.4,
-        radius: 1.35, stop: 0 #fff, stop: 1 #bbb
-        );
-    }
+
 
 QPushButton:pressed {
     border-style: inset;
-    background: qradialgradient(
-        cx: 0.4, cy: -0.1, fx: 0.4, fy: -0.1,
-        radius: 1.35, stop: 0 #fff, stop: 1 #ddd
-        );
+	background-color: green;
     }</string>
           </property>
           <property name="text">
@@ -507,6 +496,9 @@ QPushButton:pressed {
           </property>
           <property name="default">
            <bool>true</bool>
+          </property>
+          <property name="flat">
+           <bool>false</bool>
           </property>
          </widget>
         </item>
