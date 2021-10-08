@@ -74,6 +74,7 @@ void Calculator::numOpNonSpecialClicked()
 void Calculator::op_clearClicked()
 {
     ui->input->clear();
+    setFocus(); // set focus to input
 }
 
 void Calculator::op_delClicked()
@@ -356,6 +357,11 @@ bool Calculator::eventFilter(QObject *obj, QEvent *event)
                 return true;
             }
 
+            else if (keyEvent->key() == Qt::Key_Return) {
+                emit(ui->op_equal->clicked());
+                return true;
+            }
+
             else if (key == "*") {
                 emit(ui->op_mul->clicked());
                 return true;
@@ -380,8 +386,20 @@ bool Calculator::eventFilter(QObject *obj, QEvent *event)
                 emit(ui->op_equal->clicked());
                 return true;
             }
-        }
 
+            else if (key == "(")
+            {
+                int cp = ui->input->cursorPosition();
+                if (ui->input->text()[cp - 1].isDigit())
+                {
+                    ui->input->setText(ui->input->text().insert(cp, "*"));
+                    cp++;
+                }
+                ui->input->setText(ui->input->text().insert(cp, "("));
+
+                return true;
+            }
+        }
     }
     // pass the event on to the parent class
 
