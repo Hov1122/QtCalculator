@@ -192,8 +192,15 @@ QPushButton:pressed {
             <height>16777215</height>
            </size>
           </property>
+          <property name="font">
+           <font>
+            <pointsize>12</pointsize>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
           <property name="text">
-           <string>TextLabel</string>
+           <string/>
           </property>
          </widget>
         </item>
@@ -201,8 +208,8 @@ QPushButton:pressed {
       </item>
       <item>
        <layout class="QGridLayout" name="numbersOpLayout">
-        <item row="2" column="3">
-         <widget class="QPushButton" name="op_sub">
+        <item row="0" column="1">
+         <widget class="QPushButton" name="op_brackets">
           <property name="styleSheet">
            <string notr="true">QPushButton {
      background-color: #333;
@@ -234,12 +241,12 @@ QPushButton:pressed {
     }</string>
           </property>
           <property name="text">
-           <string>-</string>
+           <string>()</string>
           </property>
          </widget>
         </item>
-        <item row="4" column="0">
-         <widget class="QPushButton" name="op_sign">
+        <item row="2" column="2">
+         <widget class="QPushButton" name="num_6">
           <property name="styleSheet">
            <string notr="true">QPushButton {
      background-color: #333;
@@ -271,44 +278,7 @@ QPushButton:pressed {
     }</string>
           </property>
           <property name="text">
-           <string>+/-</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="1">
-         <widget class="QPushButton" name="num_8">
-          <property name="styleSheet">
-           <string notr="true">QPushButton {
-     background-color: #333;
-    border-style: outset;
-    border-width: 2px;
-    border-radius: 10px;
-    border-color: beige;
-    font: bold 14px;
-    padding: 6px;
-background: qradialgradient(
-        cx: 0.3, cy: -0.4, fx: 0.3, fy: -0.4,
-        radius: 1.35, stop: 0 #fff, stop: 1 #888
-        );
-    }
-
-QPushButton:hover {
-    background: qradialgradient(
-        cx: 0.3, cy: -0.4, fx: 0.3, fy: -0.4,
-        radius: 1.35, stop: 0 #fff, stop: 1 #bbb
-        );
-    }
-
-QPushButton:pressed {
-    border-style: inset;
-    background: qradialgradient(
-        cx: 0.4, cy: -0.1, fx: 0.4, fy: -0.1,
-        radius: 1.35, stop: 0 #fff, stop: 1 #ddd
-        );
-    }</string>
-          </property>
-          <property name="text">
-           <string>8</string>
+           <string>6</string>
           </property>
          </widget>
         </item>
@@ -349,8 +319,8 @@ QPushButton:pressed {
           </property>
          </widget>
         </item>
-        <item row="0" column="0">
-         <widget class="QPushButton" name="op_clear">
+        <item row="2" column="3">
+         <widget class="QPushButton" name="op_sub">
           <property name="styleSheet">
            <string notr="true">QPushButton {
      background-color: #333;
@@ -382,12 +352,12 @@ QPushButton:pressed {
     }</string>
           </property>
           <property name="text">
-           <string>C</string>
+           <string>-</string>
           </property>
          </widget>
         </item>
-        <item row="1" column="3">
-         <widget class="QPushButton" name="op_mul">
+        <item row="1" column="1">
+         <widget class="QPushButton" name="num_8">
           <property name="styleSheet">
            <string notr="true">QPushButton {
      background-color: #333;
@@ -419,44 +389,7 @@ QPushButton:pressed {
     }</string>
           </property>
           <property name="text">
-           <string>*</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="3">
-         <widget class="QPushButton" name="op_div">
-          <property name="styleSheet">
-           <string notr="true">QPushButton {
-     background-color: #333;
-    border-style: outset;
-    border-width: 2px;
-    border-radius: 10px;
-    border-color: beige;
-    font: bold 14px;
-    padding: 6px;
-background: qradialgradient(
-        cx: 0.3, cy: -0.4, fx: 0.3, fy: -0.4,
-        radius: 1.35, stop: 0 #fff, stop: 1 #888
-        );
-    }
-
-QPushButton:hover {
-    background: qradialgradient(
-        cx: 0.3, cy: -0.4, fx: 0.3, fy: -0.4,
-        radius: 1.35, stop: 0 #fff, stop: 1 #bbb
-        );
-    }
-
-QPushButton:pressed {
-    border-style: inset;
-    background: qradialgradient(
-        cx: 0.4, cy: -0.1, fx: 0.4, fy: -0.1,
-        radius: 1.35, stop: 0 #fff, stop: 1 #ddd
-        );
-    }</string>
-          </property>
-          <property name="text">
-           <string>/</string>
+           <string>8</string>
           </property>
          </widget>
         </item>
@@ -497,8 +430,8 @@ QPushButton:pressed {
           </property>
          </widget>
         </item>
-        <item row="2" column="1">
-         <widget class="QPushButton" name="num_5">
+        <item row="3" column="2">
+         <widget class="QPushButton" name="num_3">
           <property name="styleSheet">
            <string notr="true">QPushButton {
      background-color: #333;
@@ -530,7 +463,87 @@ QPushButton:pressed {
     }</string>
           </property>
           <property name="text">
-           <string>5</string>
+           <string>3</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="3">
+         <widget class="QPushButton" name="op_equal">
+          <property name="styleSheet">
+           <string notr="true">QPushButton {
+     background-color: #333;
+    border-style: outset;
+    border-width: 2px;
+    border-radius: 10px;
+    border-color: beige;
+    font: bold 14px;
+    padding: 6px;
+background: qradialgradient(
+        cx: 0.3, cy: -0.4, fx: 0.3, fy: -0.4,
+        radius: 1.35, stop: 0 #fff, stop: 1 #888
+        );
+    }
+
+QPushButton:hover {
+    background: qradialgradient(
+        cx: 0.3, cy: -0.4, fx: 0.3, fy: -0.4,
+        radius: 1.35, stop: 0 #fff, stop: 1 #bbb
+        );
+    }
+
+QPushButton:pressed {
+    border-style: inset;
+    background: qradialgradient(
+        cx: 0.4, cy: -0.1, fx: 0.4, fy: -0.1,
+        radius: 1.35, stop: 0 #fff, stop: 1 #ddd
+        );
+    }</string>
+          </property>
+          <property name="text">
+           <string>=</string>
+          </property>
+          <property name="autoDefault">
+           <bool>false</bool>
+          </property>
+          <property name="default">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="3">
+         <widget class="QPushButton" name="op_add">
+          <property name="styleSheet">
+           <string notr="true">QPushButton {
+     background-color: #333;
+    border-style: outset;
+    border-width: 2px;
+    border-radius: 10px;
+    border-color: beige;
+    font: bold 14px;
+    padding: 6px;
+background: qradialgradient(
+        cx: 0.3, cy: -0.4, fx: 0.3, fy: -0.4,
+        radius: 1.35, stop: 0 #fff, stop: 1 #888
+        );
+    }
+
+QPushButton:hover {
+    background: qradialgradient(
+        cx: 0.3, cy: -0.4, fx: 0.3, fy: -0.4,
+        radius: 1.35, stop: 0 #fff, stop: 1 #bbb
+        );
+    }
+
+QPushButton:pressed {
+    border-style: inset;
+    background: qradialgradient(
+        cx: 0.4, cy: -0.1, fx: 0.4, fy: -0.1,
+        radius: 1.35, stop: 0 #fff, stop: 1 #ddd
+        );
+    }</string>
+          </property>
+          <property name="text">
+           <string>+</string>
           </property>
          </widget>
         </item>
@@ -577,8 +590,8 @@ QPushButton:pressed {
           </property>
          </widget>
         </item>
-        <item row="4" column="3">
-         <widget class="QPushButton" name="op_equal">
+        <item row="1" column="3">
+         <widget class="QPushButton" name="op_mul">
           <property name="styleSheet">
            <string notr="true">QPushButton {
      background-color: #333;
@@ -610,10 +623,7 @@ QPushButton:pressed {
     }</string>
           </property>
           <property name="text">
-           <string>=</string>
-          </property>
-          <property name="default">
-           <bool>true</bool>
+           <string>*</string>
           </property>
          </widget>
         </item>
@@ -657,80 +667,6 @@ QPushButton:pressed {
           </property>
          </widget>
         </item>
-        <item row="3" column="2">
-         <widget class="QPushButton" name="num_3">
-          <property name="styleSheet">
-           <string notr="true">QPushButton {
-     background-color: #333;
-    border-style: outset;
-    border-width: 2px;
-    border-radius: 10px;
-    border-color: beige;
-    font: bold 14px;
-    padding: 6px;
-background: qradialgradient(
-        cx: 0.3, cy: -0.4, fx: 0.3, fy: -0.4,
-        radius: 1.35, stop: 0 #fff, stop: 1 #888
-        );
-    }
-
-QPushButton:hover {
-    background: qradialgradient(
-        cx: 0.3, cy: -0.4, fx: 0.3, fy: -0.4,
-        radius: 1.35, stop: 0 #fff, stop: 1 #bbb
-        );
-    }
-
-QPushButton:pressed {
-    border-style: inset;
-    background: qradialgradient(
-        cx: 0.4, cy: -0.1, fx: 0.4, fy: -0.1,
-        radius: 1.35, stop: 0 #fff, stop: 1 #ddd
-        );
-    }</string>
-          </property>
-          <property name="text">
-           <string>3</string>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="1">
-         <widget class="QPushButton" name="num_0">
-          <property name="styleSheet">
-           <string notr="true">QPushButton {
-     background-color: #333;
-    border-style: outset;
-    border-width: 2px;
-    border-radius: 10px;
-    border-color: beige;
-    font: bold 14px;
-    padding: 6px;
-background: qradialgradient(
-        cx: 0.3, cy: -0.4, fx: 0.3, fy: -0.4,
-        radius: 1.35, stop: 0 #fff, stop: 1 #888
-        );
-    }
-
-QPushButton:hover {
-    background: qradialgradient(
-        cx: 0.3, cy: -0.4, fx: 0.3, fy: -0.4,
-        radius: 1.35, stop: 0 #fff, stop: 1 #bbb
-        );
-    }
-
-QPushButton:pressed {
-    border-style: inset;
-    background: qradialgradient(
-        cx: 0.4, cy: -0.1, fx: 0.4, fy: -0.1,
-        radius: 1.35, stop: 0 #fff, stop: 1 #ddd
-        );
-    }</string>
-          </property>
-          <property name="text">
-           <string>0</string>
-          </property>
-         </widget>
-        </item>
         <item row="4" column="2">
          <widget class="QPushButton" name="op_point">
           <property name="styleSheet">
@@ -766,10 +702,13 @@ QPushButton:pressed {
           <property name="text">
            <string>.</string>
           </property>
+          <property name="default">
+           <bool>false</bool>
+          </property>
          </widget>
         </item>
-        <item row="0" column="1">
-         <widget class="QPushButton" name="op_brackets">
+        <item row="0" column="3">
+         <widget class="QPushButton" name="op_div">
           <property name="styleSheet">
            <string notr="true">QPushButton {
      background-color: #333;
@@ -801,12 +740,12 @@ QPushButton:pressed {
     }</string>
           </property>
           <property name="text">
-           <string>()</string>
+           <string>/</string>
           </property>
          </widget>
         </item>
-        <item row="3" column="3">
-         <widget class="QPushButton" name="op_add">
+        <item row="0" column="0">
+         <widget class="QPushButton" name="op_clear">
           <property name="styleSheet">
            <string notr="true">QPushButton {
      background-color: #333;
@@ -838,12 +777,12 @@ QPushButton:pressed {
     }</string>
           </property>
           <property name="text">
-           <string>+</string>
+           <string>C</string>
           </property>
          </widget>
         </item>
-        <item row="3" column="0">
-         <widget class="QPushButton" name="num_1">
+        <item row="2" column="1">
+         <widget class="QPushButton" name="num_5">
           <property name="styleSheet">
            <string notr="true">QPushButton {
      background-color: #333;
@@ -875,7 +814,7 @@ QPushButton:pressed {
     }</string>
           </property>
           <property name="text">
-           <string>1</string>
+           <string>5</string>
           </property>
          </widget>
         </item>
@@ -916,8 +855,8 @@ QPushButton:pressed {
           </property>
          </widget>
         </item>
-        <item row="2" column="2">
-         <widget class="QPushButton" name="num_6">
+        <item row="3" column="0">
+         <widget class="QPushButton" name="num_1">
           <property name="styleSheet">
            <string notr="true">QPushButton {
      background-color: #333;
@@ -949,7 +888,81 @@ QPushButton:pressed {
     }</string>
           </property>
           <property name="text">
-           <string>6</string>
+           <string>1</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="1">
+         <widget class="QPushButton" name="num_0">
+          <property name="styleSheet">
+           <string notr="true">QPushButton {
+     background-color: #333;
+    border-style: outset;
+    border-width: 2px;
+    border-radius: 10px;
+    border-color: beige;
+    font: bold 14px;
+    padding: 6px;
+background: qradialgradient(
+        cx: 0.3, cy: -0.4, fx: 0.3, fy: -0.4,
+        radius: 1.35, stop: 0 #fff, stop: 1 #888
+        );
+    }
+
+QPushButton:hover {
+    background: qradialgradient(
+        cx: 0.3, cy: -0.4, fx: 0.3, fy: -0.4,
+        radius: 1.35, stop: 0 #fff, stop: 1 #bbb
+        );
+    }
+
+QPushButton:pressed {
+    border-style: inset;
+    background: qradialgradient(
+        cx: 0.4, cy: -0.1, fx: 0.4, fy: -0.1,
+        radius: 1.35, stop: 0 #fff, stop: 1 #ddd
+        );
+    }</string>
+          </property>
+          <property name="text">
+           <string>0</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="0">
+         <widget class="QPushButton" name="op_sign">
+          <property name="styleSheet">
+           <string notr="true">QPushButton {
+     background-color: #333;
+    border-style: outset;
+    border-width: 2px;
+    border-radius: 10px;
+    border-color: beige;
+    font: bold 14px;
+    padding: 6px;
+background: qradialgradient(
+        cx: 0.3, cy: -0.4, fx: 0.3, fy: -0.4,
+        radius: 1.35, stop: 0 #fff, stop: 1 #888
+        );
+    }
+
+QPushButton:hover {
+    background: qradialgradient(
+        cx: 0.3, cy: -0.4, fx: 0.3, fy: -0.4,
+        radius: 1.35, stop: 0 #fff, stop: 1 #bbb
+        );
+    }
+
+QPushButton:pressed {
+    border-style: inset;
+    background: qradialgradient(
+        cx: 0.4, cy: -0.1, fx: 0.4, fy: -0.1,
+        radius: 1.35, stop: 0 #fff, stop: 1 #ddd
+        );
+    }</string>
+          </property>
+          <property name="text">
+           <string>+/-</string>
           </property>
          </widget>
         </item>

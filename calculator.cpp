@@ -1,12 +1,29 @@
 #include "calculator.h"
 #include "ui_calculator.h"
 #include <iostream>
+#include <QKeyEvent>
+#include <map>
+#include <QRegularExpression>
+#include <QRegularExpressionValidator>
+#include <stack>
+#include <cmath>
+
 
 Calculator::Calculator(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::Calculator)
+    , pointAllowed(true)
 {
     ui->setupUi(this);
+    qApp->installEventFilter(this);
+
+   // QRegularExpression rx("[^a-zA-Z&^$#@!\[_\\] ={};:\"']+"); //exclude this charactes
+    QRegularExpression rx("[0-9/*%()+-.]+"); // allow only those characters
+    QValidator *validator = new QRegularExpressionValidator(rx, this);
+    ui->input->setValidator(validator);
+    ui->input->setMaxLength(35);
+    ui->op_sign->setVisible(false);
+    ui->op_sign->setDisabled(true);
 
     for (int i = 0; i <  ui->numbersOpLayout->columnCount() * ui->numbersOpLayout->rowCount(); i++)
     {
@@ -18,10 +35,10 @@ Calculator::Calculator(QWidget *parent)
                        button == ui->op_div || button == ui->op_mul))
             connect(button, SIGNAL(clicked()), this, SLOT(op_mathOpClicked()));
 
-        else if (button && button == ui->op_sign)
-            connect(button, SIGNAL(clicked()), this, SLOT(op_signClicked()));
 
-        else if ( button && (button != ui->op_brackets && button != ui->op_equal && button != ui->op_clear))
+
+        else if ( button && (button != ui->op_brackets && button != ui->op_equal && button != ui->op_clear
+                             && button != ui->op_point))
         {
             connect( button, SIGNAL(clicked()), this, SLOT(numOpNonSpecialClicked()) );
         }
@@ -30,6 +47,10 @@ Calculator::Calculator(QWidget *parent)
     connect(ui->op_clear, SIGNAL(clicked()), this, SLOT(op_clearClicked()));
     connect(ui->op_del, SIGNAL(clicked()), this, SLOT(op_delClicked()));
     connect(ui->op_equal, SIGNAL(clicked()), this, SLOT(op_equalClicked()));
+    connect(ui->op_brackets, SIGNAL(clicked()), this, SLOT(op_bracketsClicked()));
+    connect(ui->op_point, SIGNAL(clicked()), this, SLOT(op_pointClicked()));
+    connect(ui->input, SIGNAL(textChanged(const QString&)), this, SLOT(on_input_textChanged()));
+
 }
 
 Calculator::~Calculator()
@@ -41,8 +62,12 @@ Calculator::~Calculator()
 void Calculator::numOpNonSpecialClicked()
 {
     QPushButton* callingButton = qobject_cast<QPushButton*>( sender() );
-    if (callingButton)
-        ui->input->setText(ui->input->text() + callingButton->text());
+    int cp = ui->input->cursorPosition();
+    if (callingButton) {
+        ui->input->setText(ui->input->text().insert(cp, callingButton->text()));
+        ui->input->setCursorPosition(cp + 1);
+    }
+    ui->input->setFocus();
 }
 
 
@@ -53,38 +78,318 @@ void Calculator::op_clearClicked()
 
 void Calculator::op_delClicked()
 {
-    if (!ui->input->text().isEmpty())
-        ui->input->setText(ui->input->text().remove(ui->input->text().size() - 1, 1));
+    if (!ui->input->text().isEmpty()) {
+        int cp = ui->input->cursorPosition();
+        if (cp > 0) {
+            ui->input->setText(ui->input->text().remove(cp - 1, 1));
+            ui->input->setCursorPosition(cp - 1);
+        }
+    }
+    ui->input->setFocus();
+}
+
+void Calculator::op_pointClicked()
+{
+    if (!ui->input->text().isEmpty()) {
+        int cp = ui->input->cursorPosition();
+        if (ui->input->text()[cp - 1].isDigit() && pointAllowed) {
+            ui->input->setText(ui->input->text().insert(cp, ui->op_point->text()));
+            ui->input->setCursorPosition(cp + 1);
+            pointAllowed = false;
+        }
+    }
+    ui->input->setFocus();
 }
 
 void Calculator::op_mathOpClicked()
 {
     if (ui->input->text().isEmpty()) return;
-
     QPushButton* callingButton = qobject_cast<QPushButton*>( sender() );
 
-    QChar notAllowed[] = {'/', '%', '*', '+', '-', '.'};
+    QChar notAllowed[] = {'/', '%', '*', '+', '-', '.', '('};
     bool allowed = true;
-    for (int i = 0; i < 6; i++)
-        if (ui->input->text()[ui->input->text().size() - 1] == notAllowed[i])
+    int cp = ui->input->cursorPosition();
+
+    for (int i = 0; i < 7; i++)
+        if (i == 6 && callingButton == ui->op_sub) break;
+        else if (ui->input->text()[cp - 1] == notAllowed[i])
             allowed = false;
 
-    if (allowed)
-        ui->input->setText(ui->input->text() + callingButton->text());
+    if (allowed) {
+        //ui->input->setText(ui->input->text() + callingButton->text());
+        ui->input->setText(ui->input->text().insert(cp, callingButton->text()));
+        ui->input->setCursorPosition(cp + 1);
+    }
+    ui->input->setFocus();
+    pointAllowed = true;
 }
 
-void Calculator::op_signClicked()
-{
 
-}
 
 void Calculator::op_equalClicked()
 {
-    double res = countExpression(ui->input->text());
-    ui->answerLabel->setText(QString::number(res));
+    QChar no = ui->input->text()[ui->input->text().size() - 1];
+    QString res;
+    if (no == '/' || no == '*' || no == '+' || no == '-' || no == '%') {
+        res = "Invalid input";
+        ui->answerLabel->setStyleSheet("QLabel { color : red; }");
+    }
+    else {
+        res = countExpression(ui->input->text());
+        if (res == "Invalid input") ui->answerLabel->setStyleSheet("QLabel { color : red; }");
+        else ui->answerLabel->setStyleSheet("QLabel { color : black; }");
+    }
+    ui->answerLabel->setText(res);
 }
 
-double Calculator::countExpression(const QString& exp)
+void Calculator::setFocus()
+{
+    ui->input->setFocus();
+}
+
+
+void Calculator::op_bracketsClicked()
+{
+    int cp = ui->input->cursorPosition();
+
+    for (int i = 0; i <= 9; i++) {
+        if (ui->input->text().isEmpty()) break;
+        if (ui->input->text()[cp - 1] == QString::number(i)) {
+            ui->input->setText(ui->input->text().insert(cp, "*"));
+            cp++;
+        }
+    }
+
+    ui->input->setText(ui->input->text().insert(cp, ui->op_brackets->text()));
+    ui->input->setCursorPosition(cp + 1);
+    ui->input->setFocus();
+}
+
+int precedence(char op){
+    if (op == '+' || op == '-')
+        return 1;
+    if (op == '*' || op == '/' || op == '%')
+        return 2;
+    return 0;
+}
+
+// Function to perform arithmetic operations.
+double applyOp(double a, double b, char op){
+    switch(op){
+        case '+': return a + b;
+        case '-': return a - b;
+        case '*': return a * b;
+        case '/': return a / b;
+        case '%': return b * a / 100;
+    }
+}
+
+QString Calculator::countExpression(const QString& ex)
 {
 
+        int i;
+        std::string exp = ex.toStdString();
+        // stack to store integer values.
+        std::stack <double> values;
+
+        // stack to store operators.
+        std::stack <char> ops;
+
+
+
+        for(i = 0; i < exp.length(); i++)
+        {
+
+            // Current token is a whitespace,
+            // skip it.
+            if(exp[i] == ' ')
+                continue;
+            // Current token is an opening
+            // brace, push it to 'ops'
+            else if(exp[i] == '(')
+            {
+                ops.push(exp[i]);
+            }
+
+            // Current token is a number, push
+            // it to stack for numbers.
+            else if(isdigit(exp[i]))
+            {
+                double val = 0;
+                double rm = 0;
+                bool q = false;
+                // There may be more than one
+                // digits in number.
+                int j = 1;
+                while(i < exp.length() &&
+                            (isdigit(exp[i]) || exp[i] == '.'))
+                {
+                    if (q) {
+                        rm += (exp[i] - '0') / pow(10, j);
+                        j++;
+                    }
+                    else {
+                        if (exp[i] != '.')
+                            val = (val*10) + (exp[i]-'0');
+                    }
+                    if (exp[i] == '.') q = true;
+                    i++;
+                }
+                if (q) val += rm;
+                values.push(val);
+
+                // right now the i points to
+                // the character next to the digit,
+                // since the for loop also increases
+                // the i, we would skip one
+                //  token position; we need to
+                // decrease the value of i by 1 to
+                // correct the offset.
+                  i--;
+            }
+
+            // Closing brace encountered, solve
+            // entire brace.
+            else if(exp[i] == ')')
+            {
+
+                while(!ops.empty() && ops.top() != '(')
+                {
+                    if (values.empty()) return "Invalid input";
+                    double val2 = values.top();
+                    values.pop();
+
+                    if (values.empty()) return "Invalid input";
+                    double val1 = values.top();
+                    values.pop();
+
+                    char op = ops.top();
+                    ops.pop();
+
+                    if (op == '(' || op == ')') return "Invalid input";
+                    values.push(applyOp(val1, val2, op));
+                }
+
+                // pop opening brace.
+                if(!ops.empty())
+                   ops.pop();
+            }
+
+            // Current token is an operator.
+            else
+            {
+                // While top of 'ops' has same or greater
+                // precedence to current token, which
+                // is an operator. Apply operator on top
+                // of 'ops' to top two elements in values stack.
+                while(!ops.empty() && precedence(ops.top())
+                                    >= precedence(exp[i])){
+                    if (values.empty()) return "Invalid input";
+                    double val2 = values.top();
+                    values.pop();
+
+                    if (values.empty()) return "Invalid input";
+                    double val1 = values.top();
+                    values.pop();
+
+                    char op = ops.top();
+                    ops.pop();
+
+                    if (op == '(' || op == ')') return "Invalid input";
+                    values.push(applyOp(val1, val2, op));
+                }
+
+                // Push current token to 'ops'.
+                ops.push(exp[i]);
+            }
+        }
+
+        // Entire expression has been parsed at this
+        // point, apply remaining ops to remaining
+        // values.
+        while(!ops.empty()){
+            if (values.empty()) return "Invalid input";
+            double val2 = values.top();
+            values.pop();
+
+            if (values.empty()) return "Invalid input";
+            double val1 = values.top();
+            values.pop();
+
+            char op = ops.top();
+            ops.pop();
+
+            if (op == '(' || op == ')') return "Invalid input";
+            values.push(applyOp(val1, val2, op));
+        }
+
+        // Top of 'values' contains result, return it.
+        if (values.empty()) return "Invalid input";
+        return QString::number(values.top());
+
+
 }
+
+bool Calculator::eventFilter(QObject *obj, QEvent *event)
+{
+    if (obj == ui->input)
+    {
+        if (event->type() == QEvent::KeyPress)
+        {
+            QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);
+
+            QString modifier;
+            QString key;
+
+            key = QKeySequence(keyEvent->key()).toString();
+           // qDebug().nospace() << "abc" << qPrintable(key) << "def";
+
+            if (keyEvent->key() == 45) // for -
+            {
+                emit(ui->op_sub->clicked());
+                return true;
+            }
+
+            else if (keyEvent->key() == Qt::Key_Slash)
+            {
+                emit(ui->op_div->clicked());
+                return true;
+            }
+
+            else if (key == "*") {
+                emit(ui->op_mul->clicked());
+                return true;
+            }
+
+            else if (key == "%") {
+                emit(ui->op_percentage->clicked());
+                return true;
+            }
+
+            else if (key == "+") {
+                emit(ui->op_add->clicked());
+                return true;
+            }
+
+            else if (key == ".") {
+                emit(ui->op_point->clicked());
+                return true;
+            }
+
+            else if (key == "=") {
+                emit(ui->op_equal->clicked());
+                return true;
+            }
+        }
+
+    }
+    // pass the event on to the parent class
+
+    return QMainWindow::eventFilter(obj, event);
+}
+
+void Calculator::on_input_textChanged(const QString &arg1)
+{
+    ui->answerLabel->clear();
+}
+

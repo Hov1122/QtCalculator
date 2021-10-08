@@ -20,12 +20,18 @@ private slots:
     void op_clearClicked();
     void op_delClicked();
     void op_mathOpClicked();
-    void op_signClicked();
+
     void op_equalClicked();
+    void op_bracketsClicked();
+    void op_pointClicked();
+    void setFocus();
+    void on_input_textChanged(const QString &arg1);
 
 private:
     Ui::Calculator *ui;
 
-    double countExpression(const QString&);
+    bool pointAllowed;
+    bool eventFilter(QObject *obj, QEvent *event);
+    QString countExpression(const QString&);
 };
 #endif // CALCULATOR_H
