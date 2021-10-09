@@ -1,13 +1,10 @@
-#include "calculator.h"
-#include "ui_calculator.h"
-//#include <iostream>
 #include <QKeyEvent>
-#include <map>
 #include <QRegularExpression>
 #include <QRegularExpressionValidator>
 #include <stack>
 #include <cmath>
-
+#include "calculator.h"
+#include "ui_calculator.h"
 
 Calculator::Calculator(QWidget *parent)
     : QMainWindow(parent)
@@ -15,18 +12,18 @@ Calculator::Calculator(QWidget *parent)
     , pointAllowed(true)
 {
     ui->setupUi(this);
-    qApp->installEventFilter(this);
+    qApp->installEventFilter(this); // to track keyPresses
 
    // QRegularExpression rx("[^a-zA-Z&^$#@!\[_\\] ={};:\"']+"); //exclude this charactes
     QRegularExpression rx("[0-9/*%()+-.]+"); // allow only those characters
     QValidator *validator = new QRegularExpressionValidator(rx, this);
     ui->input->setValidator(validator);
     ui->input->setMaxLength(35);
-    ui->op_sign->setVisible(false);
-    ui->op_sign->setDisabled(true);
 
-    for (int i = 0; i <  ui->numbersOpLayout->columnCount() * ui->numbersOpLayout->rowCount(); i++)
-    {
+    /// set up button's connections
+
+    for (int i = 0; i <  ui->numbersOpLayout->columnCount() * ui->numbersOpLayout->rowCount() - 1; i++)
+    { // -1 cuz first row has only columnCount() - 1 widgets
 
         QWidget* widget = ui->numbersOpLayout->itemAt( i )->widget();
         QPushButton* button = qobject_cast<QPushButton*>( widget );
@@ -34,8 +31,6 @@ Calculator::Calculator(QWidget *parent)
         if (button && (button == ui->op_add || button == ui->op_sub || button == ui->op_percentage ||
                        button == ui->op_div || button == ui->op_mul))
             connect(button, SIGNAL(clicked()), this, SLOT(op_mathOpClicked()));
-
-
 
         else if ( button && (button != ui->op_brackets && button != ui->op_equal && button != ui->op_clear
                              && button != ui->op_point))
@@ -70,7 +65,6 @@ void Calculator::numOpNonSpecialClicked()
     ui->input->setFocus();
 }
 
-
 void Calculator::op_clearClicked()
 {
     ui->input->clear();
@@ -89,6 +83,7 @@ void Calculator::op_delClicked()
     ui->input->setFocus();
 }
 
+/// allow point(.) to be inputted if and only if previous symbol is digit and that number doesnt contain other point symbol
 void Calculator::op_pointClicked()
 {
     if (!ui->input->text().isEmpty()) {
@@ -102,6 +97,7 @@ void Calculator::op_pointClicked()
     ui->input->setFocus();
 }
 
+/// allow math operator to be inputted if and only if previous symbol isnt math operator or point except }
 void Calculator::op_mathOpClicked()
 {
     if (ui->input->text().isEmpty()) return;
@@ -125,8 +121,7 @@ void Calculator::op_mathOpClicked()
     pointAllowed = true;
 }
 
-
-
+/// cacluate the input and output result in answer label
 void Calculator::op_equalClicked()
 {
     if (ui->input->text().isEmpty()){
@@ -148,12 +143,13 @@ void Calculator::op_equalClicked()
     ui->input->setFocus();
 }
 
+/// sets focus to input lineEdit
 void Calculator::setFocus()
 {
     ui->input->setFocus();
 }
 
-
+/// inputs () to lineEdit and adds * before it if it follows to digit
 void Calculator::op_bracketsClicked()
 {
     int cp = ui->input->cursorPosition();
@@ -171,6 +167,7 @@ void Calculator::op_bracketsClicked()
     ui->input->setFocus();
 }
 
+/// returns precendence of arihmetic operators
 int precedence(char op){
     if (op == '+' || op == '-')
         return 1;
@@ -179,7 +176,7 @@ int precedence(char op){
     return 0;
 }
 
-// Function to perform arithmetic operations.
+// Function to perform arithmetic operations. return Invalid input if expression is not valid
 double applyOp(double a, double b, char op){
     switch(op){
         case '+': return a + b;
@@ -190,6 +187,7 @@ double applyOp(double a, double b, char op){
     }
 }
 
+/// main function to calculate the input
 QString Calculator::countExpression(const QString& ex)
 {
 
@@ -230,17 +228,20 @@ QString Calculator::countExpression(const QString& ex)
                 while(i < exp.length() &&
                             (isdigit(exp[i]) || exp[i] == '.'))
                 {
-                    if (q) {
+                    if (q)
+                    {
                         rm += (exp[i] - '0') / pow(10, j);
                         j++;
                     }
-                    else {
+                    else
+                    {
                         if (exp[i] != '.')
                             val = (val*10) + (exp[i]-'0');
                     }
                     if (exp[i] == '.') q = true;
                     i++;
                 }
+
                 if (q) val += rm;
                 values.push(val);
 
@@ -332,10 +333,9 @@ QString Calculator::countExpression(const QString& ex)
         // Top of 'values' contains result, return it.
         if (values.empty()) return "Invalid input";
         return QString::number(values.top());
-
-
 }
 
+/// overwrides evenFilter function to proceed some key presses as needed
 bool Calculator::eventFilter(QObject *obj, QEvent *event)
 {
     if (obj == ui->input)
@@ -346,7 +346,7 @@ bool Calculator::eventFilter(QObject *obj, QEvent *event)
             QString key;
 
             key = QKeySequence(keyEvent->key()).toString();
-           // qDebug().nospace() << "abc" << qPrintable(key) << "def";
+            //qDebug().nospace() << "abc" << qPrintable(key) << "def";
 
             if (keyEvent->key() == 45) // for -
             {
@@ -360,8 +360,17 @@ bool Calculator::eventFilter(QObject *obj, QEvent *event)
                 return true;
             }
 
+            else if (keyEvent->modifiers() == Qt::ShiftModifier && keyEvent->key() == Qt::Key_Backspace)
+            {
+                /// assign shift + backspace to clear button
+                emit(ui->op_clear->clicked());
+                ui->op_clear->animateClick();
+                return true;
+            }
+
             else if (keyEvent->key() == Qt::Key_Return) {
                 emit(ui->op_equal->clicked());
+                ui->op_equal->animateClick();
                 return true;
             }
 
@@ -387,6 +396,7 @@ bool Calculator::eventFilter(QObject *obj, QEvent *event)
 
             else if (key == "=") {
                 emit(ui->op_equal->clicked());
+                ui->op_equal->animateClick();
                 return true;
             }
 
@@ -409,6 +419,7 @@ bool Calculator::eventFilter(QObject *obj, QEvent *event)
     return QMainWindow::eventFilter(obj, event);
 }
 
+/// clear answer label if input is changed
 void Calculator::on_input_textChanged(const QString &arg1)
 {
     ui->answerLabel->clear();
