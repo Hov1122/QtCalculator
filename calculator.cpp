@@ -74,14 +74,24 @@ void Calculator::op_clearClicked()
 
 void Calculator::op_delClicked()
 {
+    ui->input->setFocus();
+
     if (!ui->input->text().isEmpty()) {
+        if (ui->input->hasSelectedText()) // if has selected text delete it
+        {
+            int st = ui->input->selectionStart();
+            int end = ui->input->selectionEnd();
+            if (st > end) std::swap(st, end);
+            ui->input->setText(ui->input->text().remove(st, end - st));
+            ui->input->setCursorPosition(st);
+            return;
+        }
         int cp = ui->input->cursorPosition();
         if (cp > 0) {
             ui->input->setText(ui->input->text().remove(cp - 1, 1));
             ui->input->setCursorPosition(cp - 1);
         }
-    }
-    ui->input->setFocus();
+    } 
 }
 
 /// allow point(.) to be inputted if and only if previous symbol is digit and that number doesnt contain other point symbol
@@ -412,14 +422,14 @@ bool Calculator::eventFilter(QObject *obj, QEvent *event)
 
             if (keyEvent->key() == 45) // for -
             {
-                emit(ui->op_sub->clicked());
+                //emit(ui->op_sub->clicked());
                 ui->op_sub->animateClick();
                 return true;
             }
 
             else if (keyEvent->key() == Qt::Key_Slash)
             {
-                emit(ui->op_div->clicked());
+               // emit(ui->op_div->clicked());
                 ui->op_div->animateClick();
                 return true;
             }
@@ -427,43 +437,43 @@ bool Calculator::eventFilter(QObject *obj, QEvent *event)
             else if (keyEvent->modifiers() == Qt::ShiftModifier && keyEvent->key() == Qt::Key_Backspace)
             {
                 /// assign shift + backspace to clear button
-                emit(ui->op_clear->clicked());
+                //emit(ui->op_clear->clicked());
                 ui->op_clear->animateClick();
                 return true;
             }
 
             else if (keyEvent->key() == Qt::Key_Return) {
-                emit(ui->op_equal->clicked());
+                //emit(ui->op_equal->clicked());
                 ui->op_equal->animateClick();
                 return true;
             }
 
             else if (key == "*") {
-                emit(ui->op_mul->clicked());
+               // emit(ui->op_mul->clicked());
                 ui->op_mul->animateClick();
                 return true;
             }
 
             else if (key == "%") {
-                emit(ui->op_percentage->clicked());
+               // emit(ui->op_percentage->clicked());
                 ui->op_percentage->animateClick();
                 return true;
             }
 
             else if (key == "+") {
-                emit(ui->op_add->clicked());
+               // emit(ui->op_add->clicked());
                 ui->op_add->animateClick();
                 return true;
             }
 
             else if (key == ".") {
-                emit(ui->op_point->clicked());
+              //  emit(ui->op_point->clicked());
                 ui->op_point->animateClick();
                 return true;
             }
 
             else if (key == "=") {
-                emit(ui->op_equal->clicked());
+               // emit(ui->op_equal->clicked());
                 ui->op_equal->animateClick();
                 return true;
             }
@@ -479,6 +489,103 @@ bool Calculator::eventFilter(QObject *obj, QEvent *event)
                 ui->input->setText(ui->input->text().insert(cp++, "("));
                 ui->input->setCursorPosition(cp);
 
+                return true;
+            }
+
+            else if (keyEvent->key() == Qt::Key_Backspace) {
+                ui->op_del->setAutoRepeat(true);
+                ui->op_del->setAutoRepeatInterval(40); // to continue calling click function until key is released
+                ui->op_del->animateClick();
+                return true;
+            }
+
+            else if (key == '0') {
+              //  emit(ui->num_1->clicked());
+                ui->num_0->setAutoRepeat(true);
+                ui->num_0->setAutoRepeatInterval(40); // to continue calling click function until key is released
+                ui->num_0->animateClick();
+                //while (ui->num_1->isDown()) ui->num_1->animateClick();
+                return true;
+            }
+
+            else if (key == '1') {
+              //  emit(ui->num_1->clicked());
+                ui->num_1->setAutoRepeat(true);
+                ui->num_1->setAutoRepeatInterval(40); // to continue calling click function until key is released
+                ui->num_1->animateClick();
+                //while (ui->num_1->isDown()) ui->num_1->animateClick();
+                return true;
+            }
+
+            else if (key == '2') {
+              //  emit(ui->num_1->clicked());
+                ui->num_2->setAutoRepeat(true);
+                ui->num_2->setAutoRepeatInterval(40); // to continue calling click function until key is released
+                ui->num_2->animateClick();
+                //while (ui->num_1->isDown()) ui->num_1->animateClick();
+                return true;
+            }
+
+            else if (key == '3') {
+              //  emit(ui->num_1->clicked());
+                ui->num_3->setAutoRepeat(true);
+                ui->num_3->setAutoRepeatInterval(40); // to continue calling click function until key is released
+                ui->num_3->animateClick();
+                //while (ui->num_1->isDown()) ui->num_1->animateClick();
+                return true;
+            }
+
+            else if (key == '4') {
+              //  emit(ui->num_1->clicked());
+                ui->num_4->setAutoRepeat(true);
+                ui->num_4->setAutoRepeatInterval(40); // to continue calling click function until key is released
+                ui->num_4->animateClick();
+                //while (ui->num_1->isDown()) ui->num_1->animateClick();
+                return true;
+            }
+
+            else if (key == '5') {
+              //  emit(ui->num_1->clicked());
+                ui->num_5->setAutoRepeat(true);
+                ui->num_5->setAutoRepeatInterval(40); // to continue calling click function until key is released
+                ui->num_5->animateClick();
+                //while (ui->num_1->isDown()) ui->num_1->animateClick();
+                return true;
+            }
+
+            else if (key == '6') {
+              //  emit(ui->num_1->clicked());
+                ui->num_6->setAutoRepeat(true);
+                ui->num_6->setAutoRepeatInterval(40); // to continue calling click function until key is released
+                ui->num_6->animateClick();
+                //while (ui->num_1->isDown()) ui->num_1->animateClick();
+                return true;
+            }
+
+            else if (key == '7') {
+              //  emit(ui->num_1->clicked());
+                ui->num_7->setAutoRepeat(true);
+                ui->num_7->setAutoRepeatInterval(40); // to continue calling click function until key is released
+                ui->num_7->animateClick();
+                //while (ui->num_1->isDown()) ui->num_1->animateClick();
+                return true;
+            }
+
+            else if (key == '8') {
+              //  emit(ui->num_1->clicked());
+                ui->num_8->setAutoRepeat(true);
+                ui->num_8->setAutoRepeatInterval(40); // to continue calling click function until key is released
+                ui->num_8->animateClick();
+                //while (ui->num_1->isDown()) ui->num_1->animateClick();
+                return true;
+            }
+
+            else if (key == '9') {
+              //  emit(ui->num_1->clicked());
+                ui->num_9->setAutoRepeat(true);
+                ui->num_9->setAutoRepeatInterval(40); // to continue calling click function until key is released
+                ui->num_9->animateClick();
+                //while (ui->num_1->isDown()) ui->num_1->animateClick();
                 return true;
             }
 
