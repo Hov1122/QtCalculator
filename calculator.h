@@ -23,8 +23,7 @@ private slots:
     void op_equalClicked();
     void op_bracketsClicked();
     void op_pointClicked();
-    void setFocus();
-    void on_input_textChanged(const QString &arg1);
+    void on_input_textChanged(const QString&);
 
 private:
     Ui::Calculator *ui;
