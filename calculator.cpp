@@ -9,7 +9,6 @@
 Calculator::Calculator(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::Calculator)
-    , pointAllowed(true)
 {
     ui->setupUi(this);
     qApp->installEventFilter(this); // to track keyPresses
@@ -90,10 +89,46 @@ void Calculator::op_pointClicked()
 {
     if (!ui->input->text().isEmpty()) {
         int cp = ui->input->cursorPosition();
+        bool pointAllowed1 = true;
+        bool pointAllowed2 = true;
+        QString ip = ui->input->text();
+        for (int tmp = cp - 1; tmp >= 0; tmp--)
+        {
+            if (ip[tmp].isDigit()) continue;
+            else if (ip[tmp] == '.')
+            {
+                pointAllowed1 = false;
+                break;
+            }
+            else
+            {
+                pointAllowed1 = true;
+                break;
+            }
+        }
+        if (pointAllowed1)
+        {
+            for (int tmp = cp; tmp < ui->input->text().size(); tmp++)
+            {
+                if (ip[tmp].isDigit()) continue;
+                else if (ip[tmp] == '.')
+                {
+                    pointAllowed2 = false;
+                    break;
+                }
+                else
+                {
+                    pointAllowed2 = true;
+                    break;
+                }
+            }
+        }
+
+        bool pointAllowed = pointAllowed1 && pointAllowed2;
+
         if (ui->input->text()[cp - 1].isDigit() && pointAllowed) {
             ui->input->setText(ui->input->text().insert(cp, ui->op_point->text()));
             ui->input->setCursorPosition(cp + 1);
-            pointAllowed = false;
         }
     }
     ui->input->setFocus();
@@ -120,7 +155,6 @@ void Calculator::op_mathOpClicked()
         ui->input->setCursorPosition(cp + 1);
     }
     ui->input->setFocus();
-    pointAllowed = true;
 }
 
 /// cacluate the input and output result in answer label
@@ -132,7 +166,7 @@ void Calculator::op_equalClicked()
     }
     QChar no = ui->input->text()[ui->input->text().size() - 1];
     QString res;
-    if (no == '/' || no == '*' || no == '+' || no == '-' || no == '%') {
+    if (no == '/' || no == '*' || no == '+' || no == '-' || no == '%' || no == '.') {
         res = "Invalid input";
         ui->answerLabel->setStyleSheet("QLabel { color : red; }");
     }
@@ -215,6 +249,8 @@ QString Calculator::countExpression(const QString& ex)
                 double val = 0;
                 double rm = 0;
                 bool q = false;
+                bool noStZero = (exp[i] == '0'); // 01234 not valid
+                if (noStZero) i++;
                 // There may be more than one
                 // digits in number.
                 int j = 1;
@@ -228,10 +264,14 @@ QString Calculator::countExpression(const QString& ex)
                     }
                     else
                     {
-                        if (exp[i] != '.')
+                        if (exp[i] != '.' && !noStZero)
                             val = (val*10) + (exp[i]-'0');
                     }
-                    if (exp[i] == '.') q = true;
+                    if (exp[i] == '.') {
+                        q = true;
+                        noStZero = false;
+                    }
+                    else if (noStZero) return "Invalid input";
                     i++;
                 }
 

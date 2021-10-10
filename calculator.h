@@ -28,7 +28,6 @@ private slots:
 private:
     Ui::Calculator *ui;
 
-    bool pointAllowed; // false if number already contains point(.)
     bool eventFilter(QObject *obj, QEvent *event);
     QString countExpression(const QString&);
 };
