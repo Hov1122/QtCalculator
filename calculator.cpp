@@ -300,6 +300,7 @@ QString Calculator::countExpression(const QString& ex)
                     val *= -1;
                     negative = false;
                 }
+
                 values.push(val);
 
                 // right now the i points to
@@ -393,7 +394,7 @@ QString Calculator::countExpression(const QString& ex)
 
         // Top of 'values' contains result, return it.
         if (values.size() != 1) return "Invalid input";
-        return QString::number(values.top());
+        return QString::number(values.top(), 'g', 12);
 }
 
 /// overwrides evenFilter function to proceed some key presses as needed
