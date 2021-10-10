@@ -137,16 +137,25 @@ void Calculator::op_pointClicked()
 /// allow math operator to be inputted if and only if previous symbol isnt math operator or point except }
 void Calculator::op_mathOpClicked()
 {
-    if (ui->input->text().isEmpty()) return;
+
     QPushButton* callingButton = qobject_cast<QPushButton*>( sender() );
+
+    int cp = ui->input->cursorPosition();
+
+    if (cp == 0 && callingButton == ui->op_sub) {
+        ui->input->setText(ui->input->text().insert(cp, callingButton->text()));
+        ui->input->setCursorPosition(cp + 1);
+        ui->input->setFocus();
+        return;
+    }
+    if (ui->input->text().isEmpty()) return;
 
     QChar notAllowed[] = {'/', '%', '*', '+', '-', '.', '('};
     bool allowed = true;
-    int cp = ui->input->cursorPosition();
 
     for (int i = 0; i < 7; i++)
         if (i == 6 && callingButton == ui->op_sub) break;
-        else if (ui->input->text()[cp - 1] == notAllowed[i])
+        else if (cp > 0 && ui->input->text()[cp - 1] == notAllowed[i])
             allowed = false;
 
     if (allowed) {
@@ -226,10 +235,11 @@ QString Calculator::countExpression(const QString& ex)
         // stack to store operators.
         std::stack <char> ops;
 
-
+        bool negative = false;
 
         for(i = 0; i < exp.length(); i++)
         {
+            bool bracketsEmpty = false;
 
             // Current token is a whitespace,
             // skip it.
@@ -240,12 +250,19 @@ QString Calculator::countExpression(const QString& ex)
             else if(exp[i] == '(')
             {
                 ops.push(exp[i]);
+                bracketsEmpty = true;
+            }
+
+            else if((i == 0 || exp[i - 1] == '(') && exp[i] == '-')
+            {
+                negative = true;
             }
 
             // Current token is a number, push
             // it to stack for numbers.
             else if(isdigit(exp[i]))
             {
+                bracketsEmpty = false;
                 double val = 0;
                 double rm = 0;
                 bool q = false;
@@ -262,20 +279,27 @@ QString Calculator::countExpression(const QString& ex)
                         rm += (exp[i] - '0') / pow(10, j);
                         j++;
                     }
+
                     else
                     {
                         if (exp[i] != '.' && !noStZero)
                             val = (val*10) + (exp[i]-'0');
                     }
+
                     if (exp[i] == '.') {
                         q = true;
                         noStZero = false;
                     }
+
                     else if (noStZero) return "Invalid input";
                     i++;
                 }
 
                 if (q) val += rm;
+                if (negative) {
+                    val *= -1;
+                    negative = false;
+                }
                 values.push(val);
 
                 // right now the i points to
@@ -292,7 +316,7 @@ QString Calculator::countExpression(const QString& ex)
             // entire brace.
             else if(exp[i] == ')')
             {
-
+                if (bracketsEmpty) return "Invalid input";
                 while(!ops.empty() && ops.top() != '(')
                 {
                     if (values.empty()) return "Invalid input";
@@ -307,13 +331,14 @@ QString Calculator::countExpression(const QString& ex)
                     ops.pop();
 
                     if (op == '(' || op == ')') return "Invalid input";
+                    if (val2 == 0 && op == '/') return "Invalid input";
                     values.push(applyOp(val1, val2, op));
                 }
 
                 // pop opening brace.
                 if(!ops.empty())
                    ops.pop();
-                else return ("Ivalid input");
+                else return ("Invalid input");
             }
 
             // Current token is an operator.
@@ -337,6 +362,7 @@ QString Calculator::countExpression(const QString& ex)
                     ops.pop();
 
                     if (op == '(' || op == ')') return "Invalid input";
+                    if (val2 == 0 && op == '/') return "Invalid input";
                     values.push(applyOp(val1, val2, op));
                 }
 
@@ -361,6 +387,7 @@ QString Calculator::countExpression(const QString& ex)
             ops.pop();
 
             if (op == '(' || op == ')') return "Invalid input";
+            if (val2 == 0 && op == '/') return "Invalid input";
             values.push(applyOp(val1, val2, op));
         }
 
