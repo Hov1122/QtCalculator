@@ -35,7 +35,7 @@ Calculator::Calculator(QWidget *parent)
         else if ( button && (button != ui->op_brackets && button != ui->op_equal && button != ui->op_clear
                              && button != ui->op_point))
         {
-            connect( button, SIGNAL(clicked()), this, SLOT(numOpNonSpecialClicked()) );
+            connect( button, SIGNAL(clicked()), this, SLOT(numClicked()) );
         }
     }
 
@@ -54,14 +54,15 @@ Calculator::~Calculator()
 }
 
 
-void Calculator::numOpNonSpecialClicked()
+void Calculator::numClicked()
 {
     QPushButton* callingButton = qobject_cast<QPushButton*>( sender() );
     int cp = ui->input->cursorPosition();
     if (callingButton) {
-        if (ui->input->text()[cp - 1] == ')') ui->input->setText(ui->input->text().insert(cp++, '*'));
-        ui->input->setText(ui->input->text().insert(cp, callingButton->text()));
-        ui->input->setCursorPosition(cp + 1);
+        if (cp > 0 && ui->input->text()[cp - 1] == ')') ui->input->setText(ui->input->text().insert(cp++, '*'));
+        ui->input->setText(ui->input->text().insert(cp++, callingButton->text()));
+        if (cp < ui->input->text().size() && ui->input->text()[cp] == '(') ui->input->setText(ui->input->text().insert(cp++, '*'));
+        ui->input->setCursorPosition(cp);
     }
     ui->input->setFocus();
 }
@@ -148,7 +149,7 @@ void Calculator::op_equalClicked()
 void Calculator::op_bracketsClicked()
 {
     int cp = ui->input->cursorPosition();
-    if (cp > 0 && ui->input->text()[cp - 1].isDigit()) {
+    if (cp > 0 && (ui->input->text()[cp - 1].isDigit() || ui->input->text()[cp - 1] == ')')) {
         ui->input->setText(ui->input->text().insert(cp, "*"));
         cp++;
     }
@@ -402,12 +403,13 @@ bool Calculator::eventFilter(QObject *obj, QEvent *event)
             else if (key == "(")
             {
                 int cp = ui->input->cursorPosition();
-                if (cp > 0 && ui->input->text()[cp - 1].isDigit())
+                if (cp > 0 && (ui->input->text()[cp - 1].isDigit() || ui->input->text()[cp - 1] == ')'))
                 {
                     ui->input->setText(ui->input->text().insert(cp, "*"));
                     cp++;
                 }
-                ui->input->setText(ui->input->text().insert(cp, "("));
+                ui->input->setText(ui->input->text().insert(cp++, "("));
+                ui->input->setCursorPosition(cp);
 
                 return true;
             }
@@ -421,7 +423,9 @@ bool Calculator::eventFilter(QObject *obj, QEvent *event)
                     {
                         ui->input->setText(ui->input->text().insert(cp++, "*"));
                         ui->input->setText(ui->input->text().insert(cp++, QString::number(tmp[0] - '0')));
-                        cp++;
+                        if (cp < ui->input->text().size() && ui->input->text()[cp] == '(')
+                            ui->input->setText(ui->input->text().insert(cp++, "*"));
+                        ui->input->setCursorPosition(cp);
                         return true;
                     }
 

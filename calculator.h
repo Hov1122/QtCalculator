@@ -16,7 +16,7 @@ public:
     ~Calculator();
 
 private slots:
-    void numOpNonSpecialClicked();
+    void numClicked();
     void op_clearClicked();
     void op_delClicked();
     void op_mathOpClicked();
