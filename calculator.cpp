@@ -24,8 +24,8 @@ Calculator::Calculator(QWidget *parent)
     for (int i = 0; i <  ui->numbersOpLayout->columnCount() * ui->numbersOpLayout->rowCount() - 1; i++)
     { // -1 cuz first row has only columnCount() - 1 widgets
 
-        QWidget* widget = ui->numbersOpLayout->itemAt( i )->widget();
-        QPushButton* button = qobject_cast<QPushButton*>( widget );
+        QWidget* widget = ui->numbersOpLayout->itemAt(i)->widget();
+        QPushButton* button = qobject_cast<QPushButton*>(widget);
 
         if (button && (button == ui->op_add || button == ui->op_sub || button == ui->op_percentage ||
                        button == ui->op_div || button == ui->op_mul))
@@ -164,6 +164,13 @@ void Calculator::op_mathOpClicked()
     bool allowed = true;
 
     for (int i = 0; i < 7; i++)
+        if (i == 6) break;
+        else if (cp < ui->input->text().size() && ui->input->text()[cp] == notAllowed[i]) {
+            allowed = false;
+            break;
+        }
+
+    for (int i = 0; i < 7; i++)
         if (i == 6 && callingButton == ui->op_sub) break;
         else if (cp > 0 && ui->input->text()[cp - 1] == notAllowed[i])
             allowed = false;
@@ -207,8 +214,11 @@ void Calculator::op_bracketsClicked()
         cp++;
     }
 
-    ui->input->setText(ui->input->text().insert(cp, ui->op_brackets->text()));
-    ui->input->setCursorPosition(cp + 1);
+    ui->input->setText(ui->input->text().insert(cp++, ui->op_brackets->text()));
+    if (cp < ui->input->text().size() - 1 && (ui->input->text()[cp + 1].isDigit() || ui->input->text()[cp - 1] == '(')) {
+        ui->input->setText(ui->input->text().insert(++cp, "*"));
+    }
+    ui->input->setCursorPosition(cp - 1);
     ui->input->setFocus();
 }
 
