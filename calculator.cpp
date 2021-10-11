@@ -442,7 +442,7 @@ bool Calculator::eventFilter(QObject *obj, QEvent *event)
                 return true;
             }
 
-            else if (keyEvent->key() == Qt::Key_Return) {
+            else if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter) {
                 //emit(ui->op_equal->clicked());
                 ui->op_equal->animateClick();
                 return true;
