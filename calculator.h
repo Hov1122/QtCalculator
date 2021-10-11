@@ -15,6 +15,9 @@ public:
     Calculator(QWidget *parent = nullptr);
     ~Calculator();
 
+    static double applyOp(double, double, char);
+    static int precedence(char);
+
 private slots:
     void numClicked();
     void op_clearClicked();

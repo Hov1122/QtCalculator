@@ -44,14 +44,12 @@ Calculator::Calculator(QWidget *parent)
     connect(ui->op_brackets, SIGNAL(clicked()), this, SLOT(op_bracketsClicked()));
     connect(ui->op_point, SIGNAL(clicked()), this, SLOT(op_pointClicked()));
     connect(ui->input, SIGNAL(textChanged(const QString&)), this, SLOT(on_input_textChanged()));
-
 }
 
 Calculator::~Calculator()
 {
     delete ui;
 }
-
 
 void Calculator::numClicked()
 {
@@ -98,7 +96,10 @@ void Calculator::op_delClicked()
 void Calculator::op_pointClicked()
 {
     if (!ui->input->text().isEmpty()) {
+
         int cp = ui->input->cursorPosition();
+        if (!ui->input->text()[cp - 1].isDigit()) return;
+
         bool pointAllowed1 = true;
         bool pointAllowed2 = true;
         QString ip = ui->input->text();
@@ -136,7 +137,7 @@ void Calculator::op_pointClicked()
 
         bool pointAllowed = pointAllowed1 && pointAllowed2;
 
-        if (ui->input->text()[cp - 1].isDigit() && pointAllowed) {
+        if (pointAllowed) {
             ui->input->setText(ui->input->text().insert(cp, ui->op_point->text()));
             ui->input->setCursorPosition(cp + 1);
         }
@@ -147,6 +148,7 @@ void Calculator::op_pointClicked()
 /// allow math operator to be inputted if and only if previous symbol isnt math operator or point except }
 void Calculator::op_mathOpClicked()
 {
+    ui->input->setFocus();
 
     QPushButton* callingButton = qobject_cast<QPushButton*>( sender() );
 
@@ -155,7 +157,6 @@ void Calculator::op_mathOpClicked()
     if (cp == 0 && callingButton == ui->op_sub) {
         ui->input->setText(ui->input->text().insert(cp, callingButton->text()));
         ui->input->setCursorPosition(cp + 1);
-        ui->input->setFocus();
         return;
     }
     if (ui->input->text().isEmpty()) return;
@@ -172,22 +173,24 @@ void Calculator::op_mathOpClicked()
 
     for (int i = 0; i < 7; i++)
         if (i == 6 && callingButton == ui->op_sub) break;
-        else if (cp > 0 && ui->input->text()[cp - 1] == notAllowed[i])
+        else if (cp > 0 && ui->input->text()[cp - 1] == notAllowed[i]) {
             allowed = false;
+            break;
+        }
 
     if (allowed) {
         //ui->input->setText(ui->input->text() + callingButton->text());
         ui->input->setText(ui->input->text().insert(cp, callingButton->text()));
         ui->input->setCursorPosition(cp + 1);
     }
-    ui->input->setFocus();
 }
 
 /// cacluate the input and output result in answer label
 void Calculator::op_equalClicked()
 {
+    ui->input->setFocus();
+
     if (ui->input->text().isEmpty()){
-        ui->input->setFocus();
         return;
     }
     QChar no = ui->input->text()[ui->input->text().size() - 1];
@@ -201,8 +204,7 @@ void Calculator::op_equalClicked()
         if (res == "Invalid input") ui->answerLabel->setStyleSheet("QLabel { color : red; }");
         else ui->answerLabel->setStyleSheet("QLabel { color : black; }");
     }
-    ui->answerLabel->setText(res);
-    ui->input->setFocus();
+    ui->answerLabel->setText(res);  
 }
 
 /// inputs () to lineEdit and adds * before it if it follows to digit
@@ -223,7 +225,7 @@ void Calculator::op_bracketsClicked()
 }
 
 /// returns precendence of arihmetic operators
-int precedence(char op){
+int Calculator::precedence(char op){
     if (op == '+' || op == '-')
         return 1;
     if (op == '*' || op == '/' || op == '%')
@@ -232,7 +234,7 @@ int precedence(char op){
 }
 
 // Function to perform arithmetic operations. return Invalid input if expression is not valid
-double applyOp(double a, double b, char op){
+double Calculator::applyOp(double a, double b, char op){
     switch(op){
         case '+': return a + b;
         case '-': return a - b;
@@ -246,7 +248,6 @@ double applyOp(double a, double b, char op){
 /// main function to calculate the input
 QString Calculator::countExpression(const QString& ex)
 {
-
         int i;
         std::string exp = ex.toStdString();
         // stack to store integer values.
@@ -255,7 +256,7 @@ QString Calculator::countExpression(const QString& ex)
         // stack to store operators.
         std::stack <char> ops;
 
-        bool negative = false;
+        bool negative = false; // to determine whether number is negative or not
 
         for(i = 0; i < exp.length(); i++)
         {
@@ -327,7 +328,7 @@ QString Calculator::countExpression(const QString& ex)
                 // the character next to the digit,
                 // since the for loop also increases
                 // the i, we would skip one
-                //  token position; we need to
+                // token position; we need to
                 // decrease the value of i by 1 to
                 // correct the offset.
                   i--;
@@ -452,7 +453,7 @@ bool Calculator::eventFilter(QObject *obj, QEvent *event)
                 return true;
             }
 
-            else if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter) {
+            else if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter || key == "=") {
                 //emit(ui->op_equal->clicked());
                 ui->op_equal->animateClick();
                 return true;
@@ -482,12 +483,6 @@ bool Calculator::eventFilter(QObject *obj, QEvent *event)
                 return true;
             }
 
-            else if (key == "=") {
-               // emit(ui->op_equal->clicked());
-                ui->op_equal->animateClick();
-                return true;
-            }
-
             else if (key == "(")
             {
                 int cp = ui->input->cursorPosition();
@@ -500,6 +495,18 @@ bool Calculator::eventFilter(QObject *obj, QEvent *event)
                 ui->input->setCursorPosition(cp);
 
                 return true;
+            }
+
+            else if (key == ")")
+            {
+                /// add * after ) if next symbol is digit
+                int cp = ui->input->cursorPosition();
+                if (ui->input->text()[cp].isDigit())
+                {
+                    ui->input->setText(ui->input->text().insert(cp++, ")*"));
+                    ui->input->setCursorPosition(++cp);
+                    return true;
+                }
             }
 
             else if (keyEvent->key() == Qt::Key_Backspace) {
@@ -597,30 +604,10 @@ bool Calculator::eventFilter(QObject *obj, QEvent *event)
                 ui->num_9->animateClick();
                 //while (ui->num_1->isDown()) ui->num_1->animateClick();
                 return true;
-            }
-
-            else {
-                /// add * after ) if next symbol is digit
-                std::string tmp = key.toStdString();
-                if (isdigit(tmp[0])) {
-                    int cp = ui->input->cursorPosition();
-                    if (cp > 0 && ui->input->text()[cp - 1] == ')')
-                    {
-                        ui->input->setText(ui->input->text().insert(cp++, "*"));
-                        ui->input->setText(ui->input->text().insert(cp++, QString::number(tmp[0] - '0')));
-                        if (cp < ui->input->text().size() && ui->input->text()[cp] == '(')
-                            ui->input->setText(ui->input->text().insert(cp++, "*"));
-                        ui->input->setCursorPosition(cp);
-                        return true;
-                    }
-
-                }
-            }
-
+            }            
         }
     }
     // pass the event on to the parent class
-
     return QMainWindow::eventFilter(obj, event);
 }
 
