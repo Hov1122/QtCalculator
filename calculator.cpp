@@ -43,7 +43,7 @@ Calculator::Calculator(QWidget *parent)
     connect(ui->op_equal, SIGNAL(clicked()), this, SLOT(op_equalClicked()));
     connect(ui->op_brackets, SIGNAL(clicked()), this, SLOT(op_bracketsClicked()));
     connect(ui->op_point, SIGNAL(clicked()), this, SLOT(op_pointClicked()));
-    connect(ui->input, SIGNAL(textChanged(const QString&)), this, SLOT(on_input_textChanged()));
+    connect(ui->input, SIGNAL(textChanged(const QString&)), this, SLOT(on_input_textChanged(const QString&)));
 }
 
 Calculator::~Calculator()
@@ -257,10 +257,11 @@ QString Calculator::countExpression(const QString& ex)
         std::stack <char> ops;
 
         bool negative = false; // to determine whether number is negative or not
+        bool bracketsEmpty = false;
 
         for(i = 0; i < exp.length(); i++)
         {
-            bool bracketsEmpty = false;
+
 
             // Current token is a whitespace,
             // skip it.
@@ -297,6 +298,7 @@ QString Calculator::countExpression(const QString& ex)
                 {
                     if (q)
                     {
+                        if (exp[i] == '.') return "Invalid input";
                         rm += (exp[i] - '0') / pow(10, j);
                         j++;
                     }
