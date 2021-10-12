@@ -217,9 +217,16 @@ void Calculator::mathFunClicked(){
             (ui->input->text()[cp - 1].isDigit() || ui->input->text()[cp - 1] == ')')) {
         ui->input->setText(ui->input->text().insert(cp++, "*"));
     }
-
-    ui->input->setText(ui->input->text().insert(cp, callingButton->text()));
-    cp += callingButton->text().size();
+    if (callingButton == ui->fun_sqrt)
+    {
+        ui->input->setText(ui->input->text().insert(cp, "sqrt"));
+        cp += 4;
+    }
+    else
+    {
+        ui->input->setText(ui->input->text().insert(cp, callingButton->text()));
+        cp += callingButton->text().size();
+    }
     ui->input->setText(ui->input->text().insert(cp, "()"));
     cp += 2;
 

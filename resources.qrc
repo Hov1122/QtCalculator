@@ -1,6 +1,7 @@
 <RCC>
     <qresource prefix="/pre">
-        <file>images/Calculator-icon.png</file>
         <file>images/delete-svgrepo-com.png</file>
+        <file>images/sqrt-icon.png</file>
+        <file>images/calculator-icon.png</file>
     </qresource>
 </RCC>
