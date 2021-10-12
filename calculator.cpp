@@ -459,7 +459,7 @@ QString Calculator::countExpression(const QString& ex)
                     values.pop();
                     if (tmp == "ln")
                     {
-                        if (val == 0) return "Invalid input";
+                        if (val <= 0) return "Invalid input";
                         values.push(log(val));
                     }
                     else if (tmp == "sin") values.push(sin(val * M_PI / 180));
