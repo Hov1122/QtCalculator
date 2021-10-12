@@ -13,23 +13,39 @@ Calculator::Calculator(QWidget *parent)
     ui->setupUi(this);
     qApp->installEventFilter(this); // to track keyPresses
 
+    ///hide advanced math functions
+    ui->op_exp->setVisible(false);
+    ui->fun_sin->setVisible(false);
+    ui->fun_cos->setVisible(false);
+    ui->fun_ln->setVisible(false);
+    ui->fun_sqrt->setVisible(false);
+    ui->op_exp->setEnabled(false);
+    ui->fun_sin->setEnabled(false);
+    ui->fun_cos->setEnabled(false);
+    ui->fun_ln->setEnabled(false);
+    ui->fun_sqrt->setEnabled(false);
+
    // QRegularExpression rx("[^a-zA-Z&^$#@!\[_\\] ={};:\"']+"); //exclude this charactes
-    QRegularExpression rx("[0-9/*%()+-.]+"); // allow only those characters
+    QRegularExpression rx("[0-9/\\^*%()+-.]+"); // allow only those characters
     QValidator *validator = new QRegularExpressionValidator(rx, this);
     ui->input->setValidator(validator);
     ui->input->setMaxLength(35);
 
     /// set up button's connections
 
-    for (int i = 0; i <  ui->numbersOpLayout->columnCount() * ui->numbersOpLayout->rowCount() - 1; i++)
+    for (int i = 0; i <  ui->numbersOpLayout->columnCount() * ui->numbersOpLayout->rowCount(); i++)
     { // -1 cuz first row has only columnCount() - 1 widgets
 
         QWidget* widget = ui->numbersOpLayout->itemAt(i)->widget();
         QPushButton* button = qobject_cast<QPushButton*>(widget);
 
         if (button && (button == ui->op_add || button == ui->op_sub || button == ui->op_percentage ||
-                       button == ui->op_div || button == ui->op_mul))
+                       button == ui->op_div || button == ui->op_mul || button == ui->op_exp))
             connect(button, SIGNAL(clicked()), this, SLOT(op_mathOpClicked()));
+
+        else if (button && (button == ui->fun_sin || button == ui->fun_ln || button == ui->fun_cos
+                            || button == ui->fun_sqrt))
+                 connect(button, SIGNAL(clicked()), this, SLOT(mathFunClicked()));
 
         else if ( button && (button != ui->op_brackets && button != ui->op_equal && button != ui->op_clear
                              && button != ui->op_point))
@@ -43,6 +59,7 @@ Calculator::Calculator(QWidget *parent)
     connect(ui->op_equal, SIGNAL(clicked()), this, SLOT(op_equalClicked()));
     connect(ui->op_brackets, SIGNAL(clicked()), this, SLOT(op_bracketsClicked()));
     connect(ui->op_point, SIGNAL(clicked()), this, SLOT(op_pointClicked()));
+    connect(ui->advanced_fun, SIGNAL(clicked()), this, SLOT(advanced_funClicked()));
     connect(ui->input, SIGNAL(textChanged(const QString&)), this, SLOT(on_input_textChanged(const QString&)));
 }
 
@@ -161,18 +178,18 @@ void Calculator::op_mathOpClicked()
     }
     if (ui->input->text().isEmpty()) return;
 
-    QChar notAllowed[] = {'/', '%', '*', '+', '-', '.', '('};
+    QChar notAllowed[] = {'/', '%', '*', '+', '-', '^', '.', '('};
     bool allowed = true;
 
-    for (int i = 0; i < 7; i++)
-        if (i == 6) break;
+    for (int i = 0; i < 8; i++)
+        if (i == 7) break;
         else if (cp < ui->input->text().size() && ui->input->text()[cp] == notAllowed[i]) {
             allowed = false;
             break;
         }
 
-    for (int i = 0; i < 7; i++)
-        if (i == 6 && callingButton == ui->op_sub) break;
+    for (int i = 0; i < 8; i++)
+        if (i == 7 && callingButton == ui->op_sub) break;
         else if (cp > 0 && ui->input->text()[cp - 1] == notAllowed[i]) {
             allowed = false;
             break;
@@ -183,6 +200,35 @@ void Calculator::op_mathOpClicked()
         ui->input->setText(ui->input->text().insert(cp, callingButton->text()));
         ui->input->setCursorPosition(cp + 1);
     }
+}
+
+void Calculator::mathFunClicked(){
+    ui->input->setFocus();
+
+    QPushButton* callingButton = qobject_cast<QPushButton*>( sender() );
+
+    int cp = ui->input->cursorPosition();
+
+    if (cp > 0 && ui->input->text()[cp - 1].isLetter()) {
+        return;
+    }
+
+    if (cp > 0 &&
+            (ui->input->text()[cp - 1].isDigit() || ui->input->text()[cp - 1] == ')')) {
+        ui->input->setText(ui->input->text().insert(cp++, "*"));
+    }
+
+    ui->input->setText(ui->input->text().insert(cp, callingButton->text()));
+    cp += callingButton->text().size();
+    ui->input->setText(ui->input->text().insert(cp, "()"));
+    cp += 2;
+
+    if (cp < ui->input->text().size() && (ui->input->text()[cp].isDigit() || ui->input->text()[cp] == '(')) {
+        ui->input->setText(ui->input->text().insert(cp, "*"));
+    }
+
+    ui->input->setCursorPosition(cp - 1);
+
 }
 
 /// cacluate the input and output result in answer label
@@ -241,6 +287,7 @@ double Calculator::applyOp(double a, double b, char op){
         case '*': return a * b;
         case '/': return a / b;
         case '%': return b * a / 100;
+        case '^': return pow(a, b);
     }
     return 0;
 }
@@ -252,6 +299,9 @@ QString Calculator::countExpression(const QString& ex)
         std::string exp = ex.toStdString();
         // stack to store integer values.
         std::stack <double> values;
+
+        // stack to store function names
+        std::stack <std::string> functions;
 
         // stack to store operators.
         std::stack <char> ops;
@@ -273,6 +323,48 @@ QString Calculator::countExpression(const QString& ex)
             {
                 ops.push(exp[i]);
                 bracketsEmpty = true;
+            }
+
+            else if (isalpha(exp[i])) {
+                if (exp[i] == 'l') {
+                    if (i + 4 < exp.size() && exp.substr(i, 3) == "ln(") // min is ln(m)
+                    {
+                        functions.push("ln");
+                        i += 1; // i will point to ( after next iteration
+                    }
+                    else return "Invalid input";
+                }
+
+                else if (exp[i] == 's') {
+                    if (i + 5 < exp.size() && exp.substr(i, 4) == "sin(") // min is sin(m)
+                    {
+                        functions.push("sin");
+                        i += 2;
+                    }
+
+                    else if (i + 6 < exp.size() && exp.substr(i, 5) == "sqrt(") // ,in is sqrt(
+                    {
+                        functions.push("sqrt");
+                        i += 3;
+                    }
+                    else return "Invalid input";
+                }
+
+                else if (exp[i] == 'c') {
+                    if (i + 5 < exp.size() && exp.substr(i, 4) == "cos(") // min is cos(m)
+                    {
+                        functions.push("cos");
+                        i += 2;
+                    }
+                    else return "Invalid input";
+                }
+
+                else
+                {
+                    return "Invalid input";
+                }
+
+
             }
 
             else if((i == 0 || exp[i - 1] == '(') && exp[i] == '-')
@@ -357,6 +449,21 @@ QString Calculator::countExpression(const QString& ex)
                     if (op == '(' || op == ')') return "Invalid input";
                     if (val2 == 0 && op == '/') return "Invalid input";
                     values.push(applyOp(val1, val2, op));
+                }
+
+                if (!functions.empty()) {
+                    std::string tmp = functions.top();
+                    functions.pop();
+                    if (values.empty()) return "Invalid input";
+                    double val = values.top();
+                    values.pop();
+                    if (tmp == "ln") values.push(log(val));
+                    else if (tmp == "sin") values.push(sin(val * M_PI / 180));
+                    else if (tmp == "cos") {
+                        if ((int)val % 90 == 0 && (int)val % 180 != 0) values.push(0);
+                        else values.push(cos(val * M_PI / 180));
+                    }
+                    else if (tmp == "sqrt") values.push(sqrt(val));
                 }
 
                 // pop opening brace.
@@ -455,6 +562,14 @@ bool Calculator::eventFilter(QObject *obj, QEvent *event)
                 return true;
             }
 
+            else if (keyEvent->modifiers() == Qt::AltModifier && keyEvent->key() == Qt::Key_A)
+            {
+                /// assign shift + backspace to clear button
+                //emit(ui->op_clear->clicked());
+                ui->advanced_fun->animateClick();
+                return true;
+            }
+
             else if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter || key == "=") {
                 //emit(ui->op_equal->clicked());
                 ui->op_equal->animateClick();
@@ -470,6 +585,12 @@ bool Calculator::eventFilter(QObject *obj, QEvent *event)
             else if (key == "%") {
                // emit(ui->op_percentage->clicked());
                 ui->op_percentage->animateClick();
+                return true;
+            }
+
+            else if (key == "^") {
+               // emit(ui->op_percentage->clicked());
+                ui->op_exp->animateClick();
                 return true;
             }
 
@@ -503,7 +624,7 @@ bool Calculator::eventFilter(QObject *obj, QEvent *event)
             {
                 /// add * after ) if next symbol is digit
                 int cp = ui->input->cursorPosition();
-                if (ui->input->text()[cp].isDigit())
+                if (cp < ui->input->text().size() && ui->input->text()[cp].isDigit())
                 {
                     ui->input->setText(ui->input->text().insert(cp++, ")*"));
                     ui->input->setCursorPosition(++cp);
@@ -617,5 +738,42 @@ bool Calculator::eventFilter(QObject *obj, QEvent *event)
 void Calculator::on_input_textChanged(const QString&)
 {
     ui->answerLabel->clear();
+}
+
+
+void Calculator::advanced_funClicked()
+{
+    ui->input->setFocus();
+
+    if (!ui->fun_ln->isVisible()) {
+        QRegularExpression rx("[0-9/\\^*%()+-.lnsqrtico]+"); // allow only those characters
+        QValidator *validator = new QRegularExpressionValidator(rx, this);
+        ui->input->setValidator(validator);
+        ui->fun_ln->setVisible(true);
+        ui->fun_ln->setEnabled(true);
+        ui->fun_sin->setVisible(true);
+        ui->fun_sin->setEnabled(true);
+        ui->fun_cos->setVisible(true);
+        ui->fun_cos->setEnabled(true);
+        ui->fun_sqrt->setVisible(true);
+        ui->fun_sqrt->setEnabled(true);
+        ui->op_exp->setVisible(true);
+        ui->op_exp->setEnabled(true);
+    }
+    else {
+        QRegularExpression rx("[0-9/\\*%()+-.]+"); // allow only those characters
+        QValidator *validator = new QRegularExpressionValidator(rx, this);
+        ui->input->setValidator(validator);
+        ui->fun_ln->setVisible(false);
+        ui->fun_ln->setEnabled(false);
+        ui->fun_sin->setVisible(false);
+        ui->fun_sin->setEnabled(false);
+        ui->fun_cos->setVisible(false);
+        ui->fun_cos->setEnabled(false);
+        ui->fun_sqrt->setVisible(false);
+        ui->fun_sqrt->setEnabled(false);
+        ui->op_exp->setVisible(false);
+        ui->op_exp->setEnabled(false);
+    }
 }
 

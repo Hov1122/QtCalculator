@@ -27,6 +27,8 @@ private slots:
     void op_bracketsClicked();
     void op_pointClicked();
     void on_input_textChanged(const QString&);
+    void mathFunClicked();
+    void advanced_funClicked();
 
 private:
     Ui::Calculator *ui;
