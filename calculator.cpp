@@ -281,7 +281,7 @@ void Calculator::op_bracketsClicked()
 int Calculator::precedence(char op){
     if (op == '+' || op == '-')
         return 1;
-    if (op == '*' || op == '/' || op == '%')
+    if (op == '*' || op == '/' || op == '%' || op == '^')
         return 2;
     return 0;
 }
@@ -470,11 +470,16 @@ QString Calculator::countExpression(const QString& ex)
                         values.push(log(val));
                     }
                     else if (tmp == "sin") values.push(sin(val * M_PI / 180));
-                    else if (tmp == "cos") {
+                    else if (tmp == "cos")
+                    {
                         if ((int)val % 90 == 0 && (int)val % 180 != 0) values.push(0);
                         else values.push(cos(val * M_PI / 180));
                     }
-                    else if (tmp == "sqrt") values.push(sqrt(val));
+                    else if (tmp == "sqrt")
+                    {
+                        if (val < 0) return "Invalid input";
+                        values.push(sqrt(val));
+                    }
                 }
 
                 // pop opening brace.
