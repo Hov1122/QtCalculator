@@ -469,10 +469,16 @@ QString Calculator::countExpression(const QString& ex)
                         if (val <= 0) return "Invalid input";
                         values.push(log(val));
                     }
-                    else if (tmp == "sin") values.push(sin(val * M_PI / 180));
+                    else if (tmp == "sin")
+                    {
+                        double p = val;
+                        if(modf(val, &p) == 0 && (int)val % 180 == 0) values.push(0);
+                        else values.push(sin(val * M_PI / 180));
+                    }
                     else if (tmp == "cos")
                     {
-                        if ((int)val % 90 == 0 && (int)val % 180 != 0) values.push(0);
+                        double p = val;
+                        if (modf(val, &p) == 0 && (int)val % 90 == 0 && (int)val % 180 != 0) values.push(0);
                         else values.push(cos(val * M_PI / 180));
                     }
                     else if (tmp == "sqrt")
