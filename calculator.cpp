@@ -25,6 +25,9 @@ Calculator::Calculator(QWidget *parent)
     ui->fun_ln->setEnabled(false);
     ui->fun_sqrt->setEnabled(false);
 
+    // make advanced button checkable
+    ui->advanced_fun->setCheckable(true);
+
    // QRegularExpression rx("[^a-zA-Z&^$#@!\[_\\] ={};:\"']+"); //exclude this charactes
     QRegularExpression rx("[0-9/\\^*%()+-.]+"); // allow only those characters
     QValidator *validator = new QRegularExpressionValidator(rx, this);
@@ -32,7 +35,6 @@ Calculator::Calculator(QWidget *parent)
     ui->input->setMaxLength(35);
 
     /// set up button's connections
-
     for (int i = 0; i <  ui->numbersOpLayout->columnCount() * ui->numbersOpLayout->rowCount(); i++)
     { // -1 cuz first row has only columnCount() - 1 widgets
 
@@ -235,7 +237,6 @@ void Calculator::mathFunClicked(){
     }
 
     ui->input->setCursorPosition(cp - 1);
-
 }
 
 /// cacluate the input and output result in answer label
@@ -318,8 +319,6 @@ QString Calculator::countExpression(const QString& ex)
 
         for(i = 0; i < exp.length(); i++)
         {
-
-
             // Current token is a whitespace,
             // skip it.
             if(exp[i] == ' ')
@@ -370,8 +369,6 @@ QString Calculator::countExpression(const QString& ex)
                 {
                     return "Invalid input";
                 }
-
-
             }
 
             else if((i == 0 || exp[i - 1] == '(') && exp[i] == '-')
@@ -762,12 +759,11 @@ void Calculator::on_input_textChanged(const QString&)
     ui->answerLabel->clear();
 }
 
-
 void Calculator::advanced_funClicked()
 {
     ui->input->setFocus();
 
-    if (!ui->fun_ln->isVisible()) {
+    if (ui->advanced_fun->isChecked()) {
         QRegularExpression rx("[0-9/\\^*%()+-.lnsqrtico]+"); // allow only those characters
         QValidator *validator = new QRegularExpressionValidator(rx, this);
         ui->input->setValidator(validator);
@@ -798,4 +794,3 @@ void Calculator::advanced_funClicked()
         ui->op_exp->setEnabled(false);
     }
 }
-
