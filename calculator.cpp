@@ -589,6 +589,46 @@ bool Calculator::eventFilter(QObject *obj, QEvent *event)
                 return true;
             }
 
+            else if (keyEvent->modifiers() == Qt::AltModifier && keyEvent->key() == Qt::Key_A)
+            {
+                /// assign shift + backspace to clear button
+                //emit(ui->op_clear->clicked());
+                ui->advanced_fun->animateClick();
+                return true;
+            }
+
+            else if (ui->advanced_fun->isChecked() && keyEvent->modifiers() == Qt::AltModifier && keyEvent->key() == Qt::Key_R)
+            {
+                /// assign shift + backspace to clear button
+                //emit(ui->op_clear->clicked());
+                ui->fun_sqrt->animateClick();
+                return true;
+            }
+
+            else if (ui->advanced_fun->isChecked() && keyEvent->modifiers() == Qt::AltModifier && keyEvent->key() == Qt::Key_S)
+            {
+                /// assign shift + backspace to clear button
+                //emit(ui->op_clear->clicked());
+                ui->fun_sin->animateClick();
+                return true;
+            }
+
+            else if (ui->advanced_fun->isChecked() && keyEvent->modifiers() == Qt::AltModifier && keyEvent->key() == Qt::Key_C)
+            {
+                /// assign shift + backspace to clear button
+                //emit(ui->op_clear->clicked());
+                ui->fun_cos->animateClick();
+                return true;
+            }
+
+            else if (ui->advanced_fun->isChecked() && keyEvent->modifiers() == Qt::AltModifier && keyEvent->key() == Qt::Key_L)
+            {
+                /// assign shift + backspace to clear button
+                //emit(ui->op_clear->clicked());
+                ui->fun_ln->animateClick();
+                return true;
+            }
+
             else if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter || key == "=") {
                 //emit(ui->op_equal->clicked());
                 ui->op_equal->animateClick();
