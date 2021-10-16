@@ -29,6 +29,7 @@ private slots:
     void on_input_textChanged(const QString&);
     void mathFunClicked();
     void advanced_funClicked();
+    void radDegClicked();
 
 private:
     Ui::Calculator *ui;

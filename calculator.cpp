@@ -24,6 +24,8 @@ Calculator::Calculator(QWidget *parent)
     ui->fun_cos->setEnabled(false);
     ui->fun_ln->setEnabled(false);
     ui->fun_sqrt->setEnabled(false);
+    ui->radDeg->setEnabled(false);
+    ui->radDeg->setVisible(false);
 
     // make advanced button checkable
     ui->advanced_fun->setCheckable(true);
@@ -56,6 +58,7 @@ Calculator::Calculator(QWidget *parent)
         }
     }
 
+    connect(ui->radDeg, SIGNAL(clicked()), this, SLOT(radDegClicked()));
     connect(ui->op_clear, SIGNAL(clicked()), this, SLOT(op_clearClicked()));
     connect(ui->op_del, SIGNAL(clicked()), this, SLOT(op_delClicked()));
     connect(ui->op_equal, SIGNAL(clicked()), this, SLOT(op_equalClicked()));
@@ -365,6 +368,19 @@ QString Calculator::countExpression(const QString& ex)
                     else return "Invalid input";
                 }
 
+                else if (exp[i] == 'e') {
+                    values.push(M_E);
+                    bracketsEmpty = false;
+                }
+
+                else if (exp[i] == 'p') {
+                    if (i < exp.size() - 1 && exp[++i] == 'i') {
+                        values.push(M_PI);
+                        bracketsEmpty = false;
+                    }
+                    else return "Invalid input";
+                }
+
                 else
                 {
                     return "Invalid input";
@@ -468,15 +484,33 @@ QString Calculator::countExpression(const QString& ex)
                     }
                     else if (tmp == "sin")
                     {
-                        double p = val;
-                        if(modf(val, &p) == 0 && (int)val % 180 == 0) values.push(0);
-                        else values.push(sin(val * M_PI / 180));
+                        if (!ui->radDeg->isChecked())
+                        {
+                            double p = val;
+                            if(modf(val, &p) == 0 && (int)val % 180 == 0) values.push(0);
+                            else values.push(sin(val * M_PI / 180));
+                        }
+                        else {
+                            val = qRadiansToDegrees(val);
+                            double p = val;
+                            if(modf(val, &p) == 0 && (int)val % 180 == 0) values.push(0);
+                            else values.push(sin(qDegreesToRadians(val)));
+                        }
                     }
                     else if (tmp == "cos")
                     {
-                        double p = val;
-                        if (modf(val, &p) == 0 && (int)val % 90 == 0 && (int)val % 180 != 0) values.push(0);
-                        else values.push(cos(val * M_PI / 180));
+                        if (!ui->radDeg->isChecked())
+                        {
+                            double p = val;
+                            if (modf(val, &p) == 0 && (int)val % 90 == 0 && (int)val % 180 != 0) values.push(0);
+                            else values.push(cos(val * M_PI / 180));
+                        }
+                        else {
+                            val = qRadiansToDegrees(val);
+                            double p = val;
+                            if(modf(val, &p) == 0 && (int)val % 90 == 0 && (int)val % 180 != 0) values.push(0);
+                            else values.push(cos(qDegreesToRadians(val)));
+                        }
                     }
                     else if (tmp == "sqrt")
                     {
@@ -561,106 +595,91 @@ bool Calculator::eventFilter(QObject *obj, QEvent *event)
 
             if (keyEvent->key() == 45) // for -
             {
-                //emit(ui->op_sub->clicked());
                 ui->op_sub->animateClick();
                 return true;
             }
 
             else if (keyEvent->key() == Qt::Key_Slash)
             {
-               // emit(ui->op_div->clicked());
                 ui->op_div->animateClick();
                 return true;
             }
 
             else if (keyEvent->modifiers() == Qt::ShiftModifier && keyEvent->key() == Qt::Key_Backspace)
             {
-                /// assign shift + backspace to clear button
-                //emit(ui->op_clear->clicked());
                 ui->op_clear->animateClick();
                 return true;
             }
 
             else if (keyEvent->modifiers() == Qt::AltModifier && keyEvent->key() == Qt::Key_A)
             {
-                /// assign shift + backspace to clear button
-                //emit(ui->op_clear->clicked());
                 ui->advanced_fun->animateClick();
                 return true;
             }
 
             else if (keyEvent->modifiers() == Qt::AltModifier && keyEvent->key() == Qt::Key_A)
             {
-                /// assign shift + backspace to clear button
-                //emit(ui->op_clear->clicked());
                 ui->advanced_fun->animateClick();
                 return true;
             }
 
             else if (ui->advanced_fun->isChecked() && keyEvent->modifiers() == Qt::AltModifier && keyEvent->key() == Qt::Key_R)
             {
-                /// assign shift + backspace to clear button
-                //emit(ui->op_clear->clicked());
                 ui->fun_sqrt->animateClick();
                 return true;
             }
 
             else if (ui->advanced_fun->isChecked() && keyEvent->modifiers() == Qt::AltModifier && keyEvent->key() == Qt::Key_S)
             {
-                /// assign shift + backspace to clear button
-                //emit(ui->op_clear->clicked());
                 ui->fun_sin->animateClick();
                 return true;
             }
 
             else if (ui->advanced_fun->isChecked() && keyEvent->modifiers() == Qt::AltModifier && keyEvent->key() == Qt::Key_C)
             {
-                /// assign shift + backspace to clear button
-                //emit(ui->op_clear->clicked());
                 ui->fun_cos->animateClick();
                 return true;
             }
 
             else if (ui->advanced_fun->isChecked() && keyEvent->modifiers() == Qt::AltModifier && keyEvent->key() == Qt::Key_L)
             {
-                /// assign shift + backspace to clear button
-                //emit(ui->op_clear->clicked());
                 ui->fun_ln->animateClick();
                 return true;
             }
 
+            else if (ui->advanced_fun->isChecked() && keyEvent->modifiers() == Qt::AltModifier && keyEvent->key() == Qt::Key_D)
+            {
+                ui->radDeg->animateClick();
+                return true;
+            }
+
             else if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter || key == "=") {
-                //emit(ui->op_equal->clicked());
                 ui->op_equal->animateClick();
                 return true;
             }
 
             else if (key == "*") {
-               // emit(ui->op_mul->clicked());
+
                 ui->op_mul->animateClick();
                 return true;
             }
 
             else if (key == "%") {
-               // emit(ui->op_percentage->clicked());
                 ui->op_percentage->animateClick();
                 return true;
             }
 
             else if (key == "^") {
-               // emit(ui->op_percentage->clicked());
                 ui->op_exp->animateClick();
                 return true;
             }
 
             else if (key == "+") {
-               // emit(ui->op_add->clicked());
                 ui->op_add->animateClick();
                 return true;
             }
 
             else if (key == ".") {
-              //  emit(ui->op_point->clicked());
                 ui->op_point->animateClick();
                 return true;
             }
@@ -699,92 +718,72 @@ bool Calculator::eventFilter(QObject *obj, QEvent *event)
             }
 
             else if (key == '0') {
-              //  emit(ui->num_1->clicked());
                 ui->num_0->setAutoRepeat(true);
                 ui->num_0->setAutoRepeatInterval(40); // to continue calling click function until key is released
                 ui->num_0->animateClick();
-                //while (ui->num_1->isDown()) ui->num_1->animateClick();
                 return true;
             }
 
             else if (key == '1') {
-              //  emit(ui->num_1->clicked());
                 ui->num_1->setAutoRepeat(true);
                 ui->num_1->setAutoRepeatInterval(40); // to continue calling click function until key is released
                 ui->num_1->animateClick();
-                //while (ui->num_1->isDown()) ui->num_1->animateClick();
                 return true;
             }
 
             else if (key == '2') {
-              //  emit(ui->num_1->clicked());
                 ui->num_2->setAutoRepeat(true);
                 ui->num_2->setAutoRepeatInterval(40); // to continue calling click function until key is released
                 ui->num_2->animateClick();
-                //while (ui->num_1->isDown()) ui->num_1->animateClick();
                 return true;
             }
 
             else if (key == '3') {
-              //  emit(ui->num_1->clicked());
                 ui->num_3->setAutoRepeat(true);
                 ui->num_3->setAutoRepeatInterval(40); // to continue calling click function until key is released
                 ui->num_3->animateClick();
-                //while (ui->num_1->isDown()) ui->num_1->animateClick();
                 return true;
             }
 
             else if (key == '4') {
-              //  emit(ui->num_1->clicked());
                 ui->num_4->setAutoRepeat(true);
                 ui->num_4->setAutoRepeatInterval(40); // to continue calling click function until key is released
                 ui->num_4->animateClick();
-                //while (ui->num_1->isDown()) ui->num_1->animateClick();
                 return true;
             }
 
             else if (key == '5') {
-              //  emit(ui->num_1->clicked());
                 ui->num_5->setAutoRepeat(true);
                 ui->num_5->setAutoRepeatInterval(40); // to continue calling click function until key is released
                 ui->num_5->animateClick();
-                //while (ui->num_1->isDown()) ui->num_1->animateClick();
                 return true;
             }
 
             else if (key == '6') {
-              //  emit(ui->num_1->clicked());
                 ui->num_6->setAutoRepeat(true);
                 ui->num_6->setAutoRepeatInterval(40); // to continue calling click function until key is released
                 ui->num_6->animateClick();
-                //while (ui->num_1->isDown()) ui->num_1->animateClick();
                 return true;
             }
 
             else if (key == '7') {
-              //  emit(ui->num_1->clicked());
                 ui->num_7->setAutoRepeat(true);
                 ui->num_7->setAutoRepeatInterval(40); // to continue calling click function until key is released
                 ui->num_7->animateClick();
-                //while (ui->num_1->isDown()) ui->num_1->animateClick();
                 return true;
             }
 
             else if (key == '8') {
-              //  emit(ui->num_1->clicked());
                 ui->num_8->setAutoRepeat(true);
                 ui->num_8->setAutoRepeatInterval(40); // to continue calling click function until key is released
                 ui->num_8->animateClick();
-                //while (ui->num_1->isDown()) ui->num_1->animateClick();
                 return true;
             }
 
             else if (key == '9') {
-              //  emit(ui->num_1->clicked());
                 ui->num_9->setAutoRepeat(true);
                 ui->num_9->setAutoRepeatInterval(40); // to continue calling click function until key is released
                 ui->num_9->animateClick();
-                //while (ui->num_1->isDown()) ui->num_1->animateClick();
                 return true;
             }            
         }
@@ -803,34 +802,33 @@ void Calculator::advanced_funClicked()
 {
     ui->input->setFocus();
 
-    if (ui->advanced_fun->isChecked()) {
-        QRegularExpression rx("[0-9/\\^*%()+-.lnsqrtico]+"); // allow only those characters
-        QValidator *validator = new QRegularExpressionValidator(rx, this);
-        ui->input->setValidator(validator);
-        ui->fun_ln->setVisible(true);
-        ui->fun_ln->setEnabled(true);
-        ui->fun_sin->setVisible(true);
-        ui->fun_sin->setEnabled(true);
-        ui->fun_cos->setVisible(true);
-        ui->fun_cos->setEnabled(true);
-        ui->fun_sqrt->setVisible(true);
-        ui->fun_sqrt->setEnabled(true);
-        ui->op_exp->setVisible(true);
-        ui->op_exp->setEnabled(true);
-    }
-    else {
-        QRegularExpression rx("[0-9/\\*%()+-.]+"); // allow only those characters
-        QValidator *validator = new QRegularExpressionValidator(rx, this);
-        ui->input->setValidator(validator);
-        ui->fun_ln->setVisible(false);
-        ui->fun_ln->setEnabled(false);
-        ui->fun_sin->setVisible(false);
-        ui->fun_sin->setEnabled(false);
-        ui->fun_cos->setVisible(false);
-        ui->fun_cos->setEnabled(false);
-        ui->fun_sqrt->setVisible(false);
-        ui->fun_sqrt->setEnabled(false);
-        ui->op_exp->setVisible(false);
-        ui->op_exp->setEnabled(false);
-    }
+    bool ch = ui->advanced_fun->isChecked();
+
+    ui->fun_ln->setVisible(ch);
+    ui->fun_ln->setEnabled(ch);
+    ui->fun_sin->setVisible(ch);
+    ui->fun_sin->setEnabled(ch);
+    ui->fun_cos->setVisible(ch);
+    ui->fun_cos->setEnabled(ch);
+    ui->fun_sqrt->setVisible(ch);
+    ui->fun_sqrt->setEnabled(ch);
+    ui->op_exp->setVisible(ch);
+    ui->op_exp->setEnabled(ch);
+    ui->op_exp->setVisible(ch);
+    ui->op_exp->setEnabled(ch);
+    ui->radDeg->setVisible(ch);
+    ui->radDeg->setEnabled(ch);
+
+    QRegularExpression rx;
+    if (ch) rx = QRegularExpression("[0-9/\\^*%()+-.lnsqrticope]+"); // allow only those characters
+    else rx = QRegularExpression("[0-9/\\^*%()+-.lnsqrtico]+");
+
+    QValidator *validator = new QRegularExpressionValidator(rx, this);
+    ui->input->setValidator(validator);
 }
+
+void Calculator::radDegClicked()
+{
+    ui->input->setFocus();
+}
+
